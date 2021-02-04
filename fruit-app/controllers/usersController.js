@@ -1,7 +1,6 @@
 const express = require("express");
 const router = express.Router();
 
-const users = require("../users");
 const User = require('../models').User;
 
 // INDEX
@@ -21,24 +20,28 @@ router.get("/login", (req, res) => {
 
 // POST LOGIN
 router.post("/login", (req, res) => {
-  console.log(req.body);
   User.findAll({
     where: {
       username: req.body.username,
       password: req.body.password
     }
   }).then((users) => {
-    console.log(users);
-    let user = users[0];
-    res.redirect(`/users/profile/${user.id}`);
+    if (users.length > 0) {
+      console.log('username/password combo is correct');
+      let user = users[0];
+      res.redirect(`/users/profile/${user.id}`);
+    } else {
+      console.log('username/password combo is not correct');
+      res.redirect('/users');
+    }
   });
 });
 
 // POST - CREATE NEW USER FROM SIGNUP
 router.post("/", (req, res) => {
-  console.log(req.body);
-  users.push(req.body);
-  res.redirect(`/users/profile/${users.length - 1}`);
+  User.create(req.body).then(newUser => {
+    res.redirect(`/users/profile/${newUser.id}`);
+  });
 });
 
 // GET USERS PROFILE
