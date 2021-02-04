@@ -48,15 +48,18 @@ router.get("/profile/:id", (req, res) => {
 });
 
 // EDIT PROFILE
-router.put("/profile/:index", (req, res) => {
-  users[req.params.index] = req.body;
-  res.redirect(`/users/profile/${req.params.index}`);
+router.put("/profile/:id", (req, res) => {
+  User.update(req.body, {
+    where: { id: req.params.id },
+    returnin: true
+  }).then((user) => res.redirect(`/users/profile/${req.params.id}`));
 });
 
 // DELETE USER
-router.delete("/:index", (req, res) => {
-  users.splice(req.params.index, 1); //remove the item from the array
-  res.redirect("/users"); //redirect back to index route
+router.delete("/:id", (req, res) => {
+  User.destroy({ where: { id: req.params.id } }).then(() => {
+    res.redirect("/users"); //redirect back to index route
+  });
 });
 
 module.exports = router;
