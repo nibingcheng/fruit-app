@@ -6,7 +6,7 @@
 
   <body>
     <h1>Welcome <%=user.name%></h1>
-    <form action="/users/profile/<%=index%>?_method=PUT" method="POST">
+    <form action="/users/profile/<%= user.id %>?_method=PUT" method="POST">
       Name: <input type="text" name="name" value="<%=user.name%>" /><br />
       <br />
       Username:
@@ -19,7 +19,7 @@
       <input type="submit" value="Edit Profile" />
     </form>
     <br />
-    <form action="/users/<%=index%>?_method=DELETE" method="POST">
+    <form action="/users/<%= user.id %>?_method=DELETE" method="POST">
       <input type="submit" value="Delete User" />
     </form>
 

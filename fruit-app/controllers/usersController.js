@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 const users = require("../users");
+const User = require('../models').User;
 
 // INDEX
 router.get("/", (req, res) => {
@@ -40,10 +41,9 @@ router.post("/", (req, res) => {
 });
 
 // GET USERS PROFILE
-router.get("/profile/:index", (req, res) => {
-  res.render("users/profile.ejs", {
-    user: users[req.params.index],
-    index: req.params.index,
+router.get("/profile/:id", (req, res) => {
+  User.findByPk(req.params.id).then((user) => {
+    res.render("users/profile.ejs", { user });
   });
 });
 
