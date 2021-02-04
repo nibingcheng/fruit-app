@@ -6,10 +6,7 @@ const User = require('../models').User;
 
 // INDEX
 router.get("/", (req, res) => {
-  console.log(users);
-  res.render("users/index.ejs", {
-    users: users,
-  });
+  res.render("users/index.ejs");
 });
 
 // GET SIGNUP FORM
@@ -25,12 +22,16 @@ router.get("/login", (req, res) => {
 // POST LOGIN
 router.post("/login", (req, res) => {
   console.log(req.body);
-  let index = users.findIndex(
-    (user) =>
-      user.username === req.body.username && user.password === req.body.password
-  );
-
-  res.redirect(`/users/profile/${index}`);
+  User.findAll({
+    where: {
+      username: req.body.username,
+      password: req.body.password
+    }
+  }).then((users) => {
+    console.log(users);
+    let user = users[0];
+    res.redirect(`/users/profile/${user.id}`);
+  });
 });
 
 // POST - CREATE NEW USER FROM SIGNUP
