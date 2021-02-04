@@ -11,6 +11,15 @@ app.use(methodOverride("_method"));
 //near the top, around other app.use() calls
 app.use(express.urlencoded({ extended: true }));
 
+app.use((req, res, next) => {
+  let logStatement = `${req.method} ${req.url}`;
+  if(Object.keys(req.body).length > 0) {
+    logStatement += ` -- body: ${JSON.stringify(req.body)}`;
+  }
+  console.log(logStatement);
+  next();
+});
+
 app.use("/fruits", require("./controllers/fruitsController.js"));
 app.use("/users", require("./controllers/usersController.js"));
 
