@@ -26,36 +26,38 @@ router.post("/", (req, res) => {
     //if not checked, req.body.readyToEat is undefined
     req.body.readyToEat = false; //do some data correction
   }
-  fruits.push(req.body);
-  res.redirect("/fruits");
+
+  Fruit.create(req.body).then((newFruit) => {
+    res.redirect("/fruits");
+  });
 });
 
-router.get("/:index", (req, res) => {
-  res.render("show.ejs", { fruit: fruits[req.params.index] });
+router.get("/:id", (req, res) => {
+  Fruit.findByPk(req.params.id).then((fruit) => {
+    res.render('show.ejs', { fruit: fruit });
+  });
 });
 
-router.get("/:index/edit", function (req, res) {
-  res.render(
-    "edit.ejs", //render views/edit.ejs
-    {
-      //pass in an object that contains
-      fruit: fruits[req.params.index], //the fruit object
-      index: req.params.index, //... and its index in the array
-    }
-  );
+router.get("/:id/edit", function (req, res) {
+  Fruit.findByPk(req.params.id).then((fruit) => {
+    res.render('edit.ejs', { fruit });
+  });
 });
 
-router.put("/:index", (req, res) => {
+router.put("/:id", (req, res) => {
   //:index is the index of our fruits array that we want to change
   req.body.readyToEat = req.body.readyToEat === "on" ? true : false;
 
-  fruits[req.params.index] = req.body; //in our fruits array, find the index that is specified in the url (:index).  Set that element to the value of req.body (the input data)
-  res.redirect("/fruits"); //redirect to the index page
+  Fruit.update(req.body, {
+    where: { id: req.params.id },
+    returning: true
+  }).then((fruit) => res.redirect("/fruits"));
 });
 
-router.delete("/:index", (req, res) => {
-  fruits.splice(req.params.index, 1); //remove the item from the array
-  res.redirect("/fruits"); //redirect back to index route
+router.delete("/:id", (req, res) => {
+  Fruit.destroy({ where: { id: req.params.id }}).then(() => {
+    res.redirect('/fruits')
+  });
 });
 
 module.exports = router;
