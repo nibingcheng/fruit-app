@@ -1,9 +1,9 @@
 const express = require("express");
 const router = express.Router();
-
 // const fruits = require("../fruits.js");
 const Fruit = require('../models').Fruit;
 const User = require('../models').User;
+const Season = require("../models").Season;
 
 //Sequelize GET route
 router.get("/", (req, res) => {
@@ -19,6 +19,7 @@ router.get("/new", (req, res) => {
   res.render("new.ejs");
 });
 
+//ADD new fruit
 router.post("/", (req, res) => {
   if (req.body.readyToEat === "on") {
     //if checked, req.body.readyToEat is set to 'on'
@@ -33,37 +34,61 @@ router.post("/", (req, res) => {
   });
 });
 
-router.get("/:id", (req, res) => {
-  Fruit.findByPk(req.params.id, {
-      include: [{
-          model: User,
-          attributes: ['name']
-      }],
-      attributes: ['name', 'color', 'readyToEat']
-  })
-  .then(fruit => {
-      res.render('show.ejs', {
-          fruit: fruit
-      });
-  })
-})
-
-router.get("/:id/edit", function (req, res) {
-  Fruit.findByPk(req.params.id).then((fruit) => {
-    res.render('edit.ejs', { fruit });
-  });
-});
-
+//UPDATE
 router.put("/:id", (req, res) => {
-  //:index is the index of our fruits array that we want to change
-  req.body.readyToEat = req.body.readyToEat === "on" ? true : false;
+  console.log(req.body);
+  if (req.body.readyToEat === "on") {
+    req.body.readyToEat = true;
+  } else {
+    req.body.readyToEat = false;
+  }
 
   Fruit.update(req.body, {
     where: { id: req.params.id },
-    returning: true
-  }).then((fruit) => res.redirect("/fruits"));
+    returning: true,
+  }).then((updatedFruit) => {
+    Season.findByPk(req.body.season).then((foundSeason) => {
+      Fruit.findByPk(req.params.id).then((foundFruit) => {
+        foundFruit.addSeason(foundSeason);
+        res.redirect("/fruits");
+      });
+    });
+  });
 });
 
+//SHOW
+router.get("/:id", (req, res) => {
+  Fruit.findByPk(req.params.id, {
+    include: [
+      {
+        model: User,
+        attributes: ["name"],
+      },
+      {
+        model: Season,
+      },
+    ],
+    attributes: ["name", "color", "readyToEat"],
+  }).then((fruit) => {
+    res.render("show.ejs", {
+      fruit: fruit,
+    });
+  });
+});
+
+//EDIT
+router.get("/:id/edit", function (req, res) {
+  Fruit.findByPk(req.params.id).then((foundFruit) => {
+    Season.findAll().then((allSeasons) => {
+      res.render("edit.ejs", {
+        fruit: foundFruit,
+        seasons: allSeasons,
+      });
+    });
+  });
+});
+
+//DELETE
 router.delete("/:id", (req, res) => {
   Fruit.destroy({ where: { id: req.params.id }}).then(() => {
     res.redirect('/fruits')
